@@ -33,19 +33,22 @@ public class GameRenderer{
 
         renderer.setColor(Color.GREEN);
         for(Player player : myWrold.players) {
+
+
             renderer.circle(player.getPosition().x, player.getPosition().y, player.getRadius());
+            renderer.setColor(Color.CORAL);
             renderer.rectLine(player.getPosition().x, player.getPosition().y,//X0 Y0 Отображение направления движения
                     (player.getPosition().x + player.getDirection().x * 2), //X
                     (player.getPosition().y + player.getDirection().y * 2), //Y
-                    5);//WEIGHT
+                    2);//WEIGHT
 
             renderer.setColor(Color.RED);
             renderer.rectLine(player.getPosition().x, player.getPosition().y,//X0 Y0 Отображение направления движения
                     (player.getPosition().x + player.getVelocity().x), //X
                     (player.getPosition().y + player.getVelocity().y),//Y
                     5);
-            renderer.rect(player.getPosition().x - 25, player.getPosition().y + 30, player.getHealth()/100 * 50, 5);
-            renderer.rect(player.getPosition().x - 25, player.getPosition().y + 35, player.getDashTime()/2 * 50, 5, Color.BLACK, Color.BLUE, Color.FIREBRICK, Color.CYAN);
+            renderer.rect(player.getPosition().x - 25, player.getPosition().y + 30, player.getHealth(), 5);
+            renderer.rect(player.getPosition().x - 25, player.getPosition().y + 35, player.getDashTime() / (Player.getMaxTime()) * 100, 5, Color.BLACK, Color.BLUE, Color.FIREBRICK, Color.CYAN);
         }
         renderer.end();
     }

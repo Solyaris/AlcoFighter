@@ -12,24 +12,30 @@ import java.util.Random;
 
 public class Player {
     static final float RADIUS = 25;
+    static float MAX_TIME = 2;
     private Vector2 position, velocity, tempVelocity, direction, dashDirection;
     private int health;
     private float dashPower, runTime, runTime0, dashDuration;
+    private int number;
     public float delay;
     private double angle;
     private boolean isPressed = false;
     float delta;
 
+    public static float getMaxTime() {
+        return MAX_TIME;
+    }
 
     public float getDashTime(){
         if(isPressed)
-        return (runTime - runTime0) % 2;
+            return 2 - Math.abs((runTime - runTime0) % 4 - 2);
         return 0;
     }
 
     public Player(int number){
+        this.number = number;
         Random r = new Random();
-        position = new Vector2(r.nextInt(640 - 50) + (640 * number + 25),
+        position = new Vector2(r.nextInt((int) (640 - RADIUS * 2)) + (640 * number + RADIUS),
                 r.nextInt(720 - 50) + 25); //игрок респится в своей части экрана, учтены радиусы игроков, чтобы не респиться за край карты
         direction = new Vector2();
         tempVelocity = new Vector2();
@@ -39,8 +45,6 @@ public class Player {
     }
 
     public void update(float delta, float runtime){
-
-      //  System.out.println(tempVelocity);
         this.delta = delta;
         this.runTime = runtime;
         if(velocity.x > 0 && tempVelocity.x > 0 || velocity.x < 0 && tempVelocity.x < 0)
@@ -58,25 +62,27 @@ public class Player {
     }
 
     public void onTouchDown(){
-        //System.out.println(Math.toDegrees(angle));z
-        runTime0 = runTime;
-        isPressed = true;
+        if(!(velocity.x > 0 && tempVelocity.x > 0 || velocity.x < 0 && tempVelocity.x < 0)) {
+            runTime0 = runTime;
+            isPressed = true;
+        }
     }
 
     public void dash(float delta){
-        velocity.add(-tempVelocity.x * delta, -tempVelocity.y * delta);
-
         position.add(tempVelocity.cpy().scl(delta));
+        velocity.add(-tempVelocity.x * delta, -tempVelocity.y * delta); // С ДЭШПАВЕРОМ РАЗОБРАТЬСЯ!!! ПРИ НЕРВОЗНОЙ СИТУАЦИИ, УБРАТЬ ЕГО К ХУЯМ
+        if(!(velocity.x > 0 && tempVelocity.x > 0 || velocity.x < 0 && tempVelocity.x < 0))
+            tempVelocity.set(0, 0);
     }
 
     public void onTouchUp() {
-        isPressed = false;
-        dashDirection.set(direction.x, direction.y);
-        dashPower = (runTime - runTime0) % 2;// Устанавливаем dashPower, не более 2 секунд
-        dashDuration = dashPower;
-        //setVelocity((float)Math.cos(angle) * dashPower * RADIUS,  (float)Math.sin(angle) * dashPower * RADIUS);
-        setVelocity(dashPower * RADIUS * 5, dashPower * RADIUS * 5, (float)angle);
-     //   System.out.println("x:" + velocity.x + " y:" + velocity.y);
+        if(!(velocity.x > 0 && tempVelocity.x > 0 || velocity.x < 0 && tempVelocity.x < 0) && isPressed == true) {
+            isPressed = false;
+            dashDirection.set(direction.x, direction.y);
+            dashPower = MAX_TIME - Math.abs((runTime - runTime0) % (MAX_TIME * 2) - MAX_TIME);// Устанавливаем dashPower, не более 2 секунд
+            dashDuration = dashPower;
+            setVelocity(dashPower * RADIUS * 4, dashPower * RADIUS * 4, (float) angle);
+        }
     }
     public float sin(float runTime){
         return (float) Math.sin(Math.toRadians((runTime % 4) * 90));
@@ -109,16 +115,19 @@ public class Player {
         return velocity;
     }
 
+    public int getNumber() {
+        return number;
+    }
+
     public void setVelocity(float powerX, float powerY, double angle) {
-        //  velocity.set(dashDirection.x * powerX, dashDirection.y * powerY);
         velocity.set(powerX, powerY);
         velocity.setAngle((float)angle);
         tempVelocity.set(velocity);
     }
-    public void changeVelocity(boolean b){
-        if(b){
+    public void changeVelocity(boolean isX){
+        if(isX){
             velocity.set(-velocity.x, velocity.y);
-            tempVelocity.set(-tempVelocity.x, velocity.y);
+            tempVelocity.set(-tempVelocity.x, tempVelocity.y);
         }
         else {
             velocity.set(velocity.x, -velocity.y);
@@ -130,9 +139,20 @@ public class Player {
         tempVelocity.setAngle((float) angle);
     }
 
+    public void setPosition(float x, float y) {
+        position.set(x, y);
+    }
+
     public void setVelocity(float x, float y) {
         velocity.set(x, y);
         tempVelocity.set(velocity);
     }
 
+    public Vector2 getTempVelocity() {
+        return tempVelocity;
+    }
+
+    public void setHealth(int health) {
+        this.health = health;
+    }
 }
